@@ -207,7 +207,7 @@ void aimbot_thread() {
 			Player* enemy = (Player*)(*enemy_offset);
 
 			// Make sure the enemy is valid and alive
-			if (player != NULL && enemy != NULL && !enemy->dead) {
+			if (player != NULL && enemy != NULL) {
 
 				// Calculate the absolute position of the enemy away from us to ensure that our future calculations are correct and based
 				// around the origin
@@ -262,13 +262,11 @@ void aimbot_thread() {
 				// Set the name to the enemy name
 				names[i] = enemy->name;
 
-				if (closest_player == -1.0f || temp_distance < closest_player) {
+				if ((closest_player == -1.0f || temp_distance < closest_player) && !enemy->dead) {
 					closest_player = temp_distance;
 					closest_yaw = yaw;
 					closest_pitch = pitch;
 				}
-
-
 			}
 		}
 
