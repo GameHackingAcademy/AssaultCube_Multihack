@@ -62,6 +62,8 @@ void print_text(DWORD x, DWORD y, const char* text) {
 		text = "";
 	}
 
+	x += 200;
+
 	__asm {
 		mov ecx, text
 		push y
