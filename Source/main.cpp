@@ -1,8 +1,12 @@
 #include <Windows.h>
 #include <math.h>
 
+#include "Triggerbot.h"
+
 #define M_PI 3.14159265358979323846
 #define MAX_PLAYERS 32
+
+Triggerbot *triggerbot;
 
 HMODULE openGLHandle = NULL;
 void(__stdcall* glDepthFunc)(unsigned int) = NULL;
@@ -12,7 +16,6 @@ DWORD opengl_ret_address = 0;
 
 DWORD triggerbot_ori_call_address = 0x4607C0;
 DWORD triggerbot_ori_jump_address = 0x0040ADA2;
-INPUT input = { 0 };
 DWORD edi_value = 0;
 
 // The player structure for every player in the game
@@ -123,19 +126,7 @@ __declspec(naked) void triggerbot_codecave() {
 		mov edi_value, eax
 	}
 
-	// If the result of the call is not zero, then we are looking at a player
-	// Create a mouse event to simulate the left mouse button being pressed down and send it to the game
-	// Otherwise, raise the mouse button up so we stop firing
-	if (edi_value != 0) {
-		input.type = INPUT_MOUSE;
-		input.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
-		SendInput(1, &input, sizeof(INPUT));
-	}
-	else {
-		input.type = INPUT_MOUSE;
-		input.mi.dwFlags = MOUSEEVENTF_LEFTUP;
-		SendInput(1, &input, sizeof(INPUT));
-	}
+	triggerbot->execute(edi_value);
 
 	// Restore the registers and jump back to original code
 	_asm {
@@ -287,6 +278,8 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
 	unsigned char* esp_hook_location = (unsigned char*)0x0040BE7E;
 
 	if (fdwReason == DLL_PROCESS_ATTACH) {
+		triggerbot = new Triggerbot();
+
 		CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)opengl_thread, NULL, 0, NULL);
 		CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)aimbot_thread, NULL, 0, NULL);
 
@@ -297,6 +290,9 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
 		VirtualProtect((void*)esp_hook_location, 5, PAGE_EXECUTE_READWRITE, &old_protect);
 		*esp_hook_location = 0xE9;
 		*(DWORD*)(esp_hook_location + 1) = (DWORD)&esp_codecave - ((DWORD)esp_hook_location + 5);
+	}
+	else if (fdwReason == DLL_PROCESS_DETACH) {
+		delete triggerbot;
 	}
 
 	return true;
