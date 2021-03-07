@@ -10,7 +10,6 @@ Triggerbot *triggerbot;
 
 HMODULE openGLHandle = NULL;
 void(__stdcall* glDepthFunc)(unsigned int) = NULL;
-void(__stdcall* glDisable)(unsigned int) = NULL;
 unsigned char* opengl_hook_location;
 DWORD opengl_ret_address = 0;
 
@@ -86,7 +85,6 @@ void opengl_thread() {
 
 		if (openGLHandle != NULL && glDepthFunc == NULL) {
 			glDepthFunc = (void(__stdcall*)(unsigned int))GetProcAddress(openGLHandle, "glDepthFunc");
-			glDisable = (void(__stdcall*)(unsigned int))GetProcAddress(openGLHandle, "glDisable");
 
 			// Then we find the location of glDrawElements and offset to an instruction that is easy to hook
 			opengl_hook_location = (unsigned char*)GetProcAddress(openGLHandle, "glDrawElements");
