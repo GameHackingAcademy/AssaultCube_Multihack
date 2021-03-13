@@ -56,6 +56,7 @@ float euclidean_distance(float x, float y) {
 	return sqrtf((x * x) + (y * y));
 }
 
+// Codecave responsible for disabling depth testing on models
 __declspec(naked) void opengl_codecave() {
 	__asm {
 		pushad
@@ -63,7 +64,7 @@ __declspec(naked) void opengl_codecave() {
 
 	(*glDepthFunc)(0x207);
 
-	// Finally, restore the original instruction and jump back
+	// Restore the original instruction and jump back
 	__asm {
 		popad
 		mov esi, dword ptr ds : [esi + 0xA18]
@@ -71,7 +72,7 @@ __declspec(naked) void opengl_codecave() {
 	}
 }
 
-// The injected thread responsible for creating our hooks
+// The injected thread responsible for creating our hooks for OpenGL
 void opengl_thread() {
 	while (true) {
 		// Since OpenGL will be loaded dynamically into the process, our thread needs to wait
@@ -109,8 +110,7 @@ void opengl_thread() {
 	}
 }
 
-// Our codecave that program execution will jump to. The declspec naked attribute tells the compiler to not add any function
-// headers around the assembled code
+// Our triggerbot codecave
 __declspec(naked) void triggerbot_codecave() {
 	// Asm blocks allow you to write pure assembly
 	// In this case, we use it to call the function we hooked and save all the registers
@@ -182,7 +182,7 @@ __declspec(naked) void esp_codecave() {
 	}
 }
 
-// This thread contains all of our aimbot code
+// This thread contains all of our aimbot and ESP code
 void aimbot_thread() {
 
 	while (true) {
@@ -280,6 +280,7 @@ void aimbot_thread() {
 
 // When our DLL is loaded, create a thread in the process to create the hook
 // We need to do this as our DLL might be loaded before OpenGL is loaded by the process
+// Also create the aimbot and ESP thread and hook the locations for the triggerbot and printing text
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
 	unsigned char* triggerbot_hook_location = (unsigned char*)0x0040AD9D;
 	unsigned char* esp_hook_location = (unsigned char*)0x0040BE7E;
