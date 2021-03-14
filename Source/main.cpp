@@ -17,6 +17,7 @@ DWORD edi_value = 0;
 
 DWORD old_protect;
 
+// Codecave responsible for disabling depth testing on models
 __declspec(naked) void opengl_codecave() {
 	__asm {
 		pushad
@@ -34,8 +35,7 @@ __declspec(naked) void opengl_codecave() {
 	}
 }
 
-// Our codecave that program execution will jump to. The declspec naked attribute tells the compiler to not add any function
-// headers around the assembled code
+// Our triggerbot codecave
 __declspec(naked) void triggerbot_codecave() {
 	// Asm blocks allow you to write pure assembly
 	// In this case, we use it to call the function we hooked and save all the registers
@@ -57,6 +57,7 @@ __declspec(naked) void triggerbot_codecave() {
 	}
 }
 
+// A helper function for printing text
 void print_text(DWORD x, DWORD y, const char* text) {
 	if (x > 2400 || x < 0 || y < 0 || y > 1800) {
 		text = "";
@@ -102,7 +103,7 @@ __declspec(naked) void text_codecave() {
 	}
 }
 
-// This thread contains all of our aimbot code
+// This thread contains all of our aimbot, ESP, and OpenGL hooking code
 void injected_thread() {
 
 	while (true) {
@@ -146,6 +147,7 @@ void injected_thread() {
 
 // When our DLL is loaded, create a thread in the process to create the hook
 // We need to do this as our DLL might be loaded before OpenGL is loaded by the process
+// Also create the aimbot and ESP thread and hook the locations for the triggerbot and printing text
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
 	unsigned char* triggerbot_hook_location = (unsigned char*)0x0040AD9D;
 	unsigned char* text_hook_location = (unsigned char*)0x0040BE7E;
