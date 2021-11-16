@@ -10,4 +10,4 @@ It also has an interactive menu that allows these features to be toggled on and 
 
 This must be injected into the Assault Cube process to work. One way to do this is to use a DLL injector. Another way is to enable AppInit_DLLs in the registry.
 
-The offsets and method to discover them are discussed in the article at: https://gamehacking.academy/lesson/29
+The offsets and method to discover them are discussed in the article at: https://gamehacking.academy/lesson/5/10
